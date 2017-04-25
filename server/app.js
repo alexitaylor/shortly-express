@@ -99,13 +99,14 @@ app.post('/signup',
     .then(() => {
       models.Users.create({
         username: req.body.username,
-        password: req.body.password + '1'
+        password: req.body.password
       });
     })
     .then(() =>{
-      res.send(200);
+      res.redirect(300, '/index')
     })
     .catch(user => {
+      res.send(200);
       res.render('login');
     });
          
