@@ -139,10 +139,8 @@ describe('', function() {
       request(options, function(error, res, body) {
         var queryString = 'SELECT * FROM users where username = "Samantha"';
         db.query(queryString, function(err, rows) {
-          console.log("right before  err handler");
 
           if (err) { done(err); }
-          console.log("got past err handler");
           var user = rows[0];
           expect(user).to.exist;
           expect(user.username).to.equal('Samantha');

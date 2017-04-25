@@ -9,7 +9,6 @@ class Users extends Model {
   }
 
   create(user) {
-  	console.log("Inside of create User: ", user);
     let passwordShasum = crypto.createHash('sha1');
     passwordShasum.update(user.password);
     user.password = passwordShasum.digest('hex');
@@ -18,7 +17,6 @@ class Users extends Model {
   }
 
   hashPassword(user) {
-  	console.log("Inside of hashPassword: ", user);
     let passwordShasum = crypto.createHash('sha1');
     passwordShasum.update(user.password);
     user.password = passwordShasum.digest('hex');

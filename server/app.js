@@ -90,10 +90,8 @@ app.post('/signup',
     models.Users.get({username: req.body.username})
     .then(user => {
       if (user) {
-        console.log("Found username: ", user);
         throw user;
       }
-      console.log("User not found");    
     })
     .then(() => {
       models.Users.create({
@@ -125,17 +123,11 @@ app.post('/login',
     models.Users.get({username: req.body.username})
     .then(user => {
       if (!user) {
-        console.log("User not found");    
         throw null;
       }
-      console.log("Found user ", user);
       return user;
     })
     .then((user) => {
-      // user is form table
-      // req.body... is from input
-      
-      console.log("inputUser = ", req.body.username, req.body.password);
       var inputUser = models.Users.hashPassword({
         username: req.body.username,
         password: req.body.password
@@ -146,9 +138,6 @@ app.post('/login',
       } else {
         res.redirect(301 ,'/login')
       }
-      console.log("===============================================")
-      console.log("hashPassword inputUser = ", inputUser);
-
     })
     .catch(() => {
       res.redirect(301, '/signup');
