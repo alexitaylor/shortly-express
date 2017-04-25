@@ -18,7 +18,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve static files from ../public directory
 app.use(express.static(path.join(__dirname, '../public')));
 
-
 app.get('/', 
 (req, res) => {
   res.render('index');
@@ -80,6 +79,52 @@ app.post('/links',
 // Write your authentication routes here
 /************************************************************/
 
+app.get('/signup',
+  (req, res, next) => {
+    res.render('signup');
+  });
+
+app.post('/signup',
+  (req, res, next) => {
+
+    models.Users.get({username: req.body.username})
+    .then(user => {
+      if (user) {
+        console.log("Found username: ", user);
+        throw user;
+      }
+      console.log("User not found");
+      //return;      
+    })
+    .then(() => {
+      models.Users.create({
+        username: req.body.username,
+        password: req.body.password + '1'
+      });
+    })
+    .then(() =>{
+      res.send(200);
+    })
+    .catch(user => {
+      res.render('login');
+    });
+         
+    
+    //userTable.create();
+    //console.log("req", req.body);
+    //console.log("app.js: /signup POST:  username: ", req.body.username, ", password: ", req.body.password);
+  });
+
+
+app.get('/login',
+  (req, res, next) => {
+    res.render('login');
+  });
+
+app.post('/login',
+  (req, res, next) => {
+
+  });
 
 
 /************************************************************/

@@ -39,15 +39,15 @@ describe('', function() {
     /* TODO: Update user and password if different than on your local machine            */
     /*************************************************************************************/
     db = mysql.createConnection({
-      user: 'student',
-      password: 'student',
+      user: 'root',
+      password: 'plantlife',
       database: 'shortly'
     });
 
     /**************************************************************************************/
     /* TODO: If you create a new MySQL tables, add it to the tablenames collection below. */
     /**************************************************************************************/
-    var tablenames = ['links', 'clicks'
+    var tablenames = ['links', 'clicks', 'users'
 ];
 
     db.connect(function(err) {
@@ -125,7 +125,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Account Creation:', function() {
+  describe('Account Creation:', function() {
 
     it('signup creates a new user record', function(done) {
       var options = {
@@ -140,7 +140,10 @@ describe('', function() {
       request(options, function(error, res, body) {
         var queryString = 'SELECT * FROM users where username = "Samantha"';
         db.query(queryString, function(err, rows) {
+          console.log("right before  err handler");
+
           if (err) { done(err); }
+          console.log("got past err handler");
           var user = rows[0];
           expect(user).to.exist;
           expect(user.username).to.equal('Samantha');
