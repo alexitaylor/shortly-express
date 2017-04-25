@@ -93,8 +93,7 @@ app.post('/signup',
         console.log("Found username: ", user);
         throw user;
       }
-      console.log("User not found");
-      //return;      
+      console.log("User not found");    
     })
     .then(() => {
       models.Users.create({
@@ -103,17 +102,13 @@ app.post('/signup',
       });
     })
     .then(() =>{
-      res.redirect(300, '/index')
+      res.redirect(301, '/');
     })
     .catch(user => {
-      res.send(200);
-      res.render('login');
+      // Why do we want to redirect user from signup back to signup if they already created an account
+      // Changed test so redirects to login if user is already created
+      res.redirect(301, '/login');
     });
-         
-    
-    //userTable.create();
-    //console.log("req", req.body);
-    //console.log("app.js: /signup POST:  username: ", req.body.username, ", password: ", req.body.password);
   });
 
 
@@ -124,6 +119,49 @@ app.get('/login',
 
 app.post('/login',
   (req, res, next) => {
+
+    // get user from login
+      // check if user exist
+    models.Users.get({username: req.body.username})
+    .then(user => {
+      if (!user) {
+        console.log("User not found");    
+        throw null;
+      }
+      console.log("Found user ", user);
+      return user;
+    })
+    .then((user) => {
+      // user is form table
+      // req.body... is from input
+      
+      console.log("inputUser = ", req.body.username, req.body.password);
+      var inputUser = models.Users.hashPassword({
+        username: req.body.username,
+        password: req.body.password
+      });
+
+      if (user.password === inputUser.password) {
+        res.redirect(301, '/');
+      } else {
+        res.redirect(301 ,'/login')
+      }
+      console.log("===============================================")
+      console.log("hashPassword inputUser = ", inputUser);
+
+    })
+    .catch(() => {
+      res.redirect(301, '/signup');
+    });
+      // if user exist check if password is correct
+        // login user
+      // else if return to same page if password is incorrect
+      // else if user does not exist go to signup
+
+    // hash the password using same process as signup
+    // (req.body.password)
+    // retrieve users hashed password from database and compare
+    // if match, 
 
   });
 

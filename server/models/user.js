@@ -17,6 +17,14 @@ class Users extends Model {
     return super.create.call(this, user);
   }
 
+  hashPassword(user) {
+  	console.log("Inside of hashPassword: ", user);
+    let passwordShasum = crypto.createHash('sha1');
+    passwordShasum.update(user.password);
+    user.password = passwordShasum.digest('hex');
+    return user;
+  }
+
 }
 
 module.exports = new Users();

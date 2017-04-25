@@ -38,6 +38,17 @@ module.exports = (db) => {
           timestamp TIMESTAMP
         );`);
     })
+    // .then(() => {
+    //   // Create clicks table
+    //   return db.queryAsync(`
+    //     CREATE TABLE IF NOT EXISTS sessions (
+    //       id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    //       hash VARCHAR(255) UNIQUE,
+    //       user_id INT,
+    //       timestamp TIMESTAMP,
+    //       FOREIGN KEY fk_users(user_id) REFERENCES users(id)
+    //     );`);
+    // })
     .error(err => {
       console.log(err);
     });
