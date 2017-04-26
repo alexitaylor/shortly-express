@@ -8,22 +8,38 @@ class Users extends Model {
     super('users');
   }
 
-  create(user) {
-    let passwordShasum = crypto.createHash('sha1');
-    passwordShasum.update(user.password);
-    user.password = passwordShasum.digest('hex');
-
-    return super.create.call(this, user);
+  compare(attempted, password, salt) {
+    return utils.compareHash(attempted, password, salt);
   }
 
-  hashPassword(user) {
-    let passwordShasum = crypto.createHash('sha1');
-    passwordShasum.update(user.password);
-    user.password = passwordShasum.digest('hex');
-    return user;
+  create({ username, password }) {
+    let timestamp = Date.now();
+    let salt = utils.createSalt(timestamp);
+
+    let newUser = {
+      username,
+      salt,
+      password: utils.createHash(password, salt)
+    };
+
+    return super.create.call(this, newUser);
   }
+
+  // create(user) {
+  //   let passwordShasum = crypto.createHash('sha1');
+  //   passwordShasum.update(user.password);
+  //   user.password = passwordShasum.digest('hex');
+
+  //   return super.create.call(this, user);
+  // }
+
+  // hashPassword(user) {
+  //   let passwordShasum = crypto.createHash('sha1');
+  //   passwordShasum.update(user.password);
+  //   user.password = passwordShasum.digest('hex');
+  //   return user;
+  // }
 
 }
 
 module.exports = new Users();
-

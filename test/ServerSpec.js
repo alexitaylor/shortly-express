@@ -40,7 +40,7 @@ describe('', function() {
     /*************************************************************************************/
     db = mysql.createConnection({
       user: 'root',
-      password: 'plantlife',
+      password: '',
       database: 'shortly'
     });
 
@@ -188,7 +188,7 @@ describe('', function() {
           if (err) { return done(err); }
           expect(response.headers.location).to.equal('/login');
           done();
-        });        
+        });
       });
     });
 
@@ -516,12 +516,12 @@ describe('', function() {
     });
   });
 
-  xdescribe('Sessions and cookies', function() {
+  describe('Sessions and cookies', function() {
     var requestWithSession;
     var cookieJar;
 
     var addUser = function(callback) {
-      
+
       var options = {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/signup',
@@ -602,7 +602,7 @@ describe('', function() {
       });
     });
   });
-  
+
   xdescribe('Privileged Access:', function() {
 
     it('Redirects to login page if a user tries to access the main page and is not signed in', function(done) {

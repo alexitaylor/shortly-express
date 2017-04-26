@@ -18,62 +18,62 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve static files from ../public directory
 app.use(express.static(path.join(__dirname, '../public')));
 
-app.get('/', 
-(req, res) => {
-  res.render('index');
-});
+app.get('/',
+  (req, res) => {
+    res.render('index');
+  });
 
-app.get('/create', 
-(req, res) => {
-  res.render('index');
-});
+app.get('/create',
+  (req, res) => {
+    res.render('index');
+  });
 
-app.get('/links', 
-(req, res, next) => {
-  models.Links.getAll()
-    .then(links => {
-      res.status(200).send(links);
-    })
-    .error(error => {
-      res.status(500).send(error);
-    });
-});
-
-app.post('/links', 
-(req, res, next) => {
-  var url = req.body.url;
-  if (!models.Links.isValidUrl(url)) {
-    // send back a 404 if link is not valid
-    return res.sendStatus(404);
-  }
-
-  return models.Links.get({ url })
-    .then(link => {
-      if (link) {
-        throw link;
-      }
-      return models.Links.getUrlTitle(url);
-    })
-    .then(title => {
-      return models.Links.create({
-        url: url,
-        title: title,
-        baseUrl: req.headers.origin
+app.get('/links',
+  (req, res, next) => {
+    models.Links.getAll()
+      .then(links => {
+        res.status(200).send(links);
+      })
+      .error(error => {
+        res.status(500).send(error);
       });
-    })
-    .then(results => {
-      return models.Links.get({ id: results.insertId });
-    })
-    .then(link => {
-      throw link;
-    })
-    .error(error => {
-      res.status(500).send(error);
-    })
-    .catch(link => {
-      res.status(200).send(link);
-    });
-});
+  });
+
+app.post('/links',
+  (req, res, next) => {
+    var url = req.body.url;
+    if (!models.Links.isValidUrl(url)) {
+      // send back a 404 if link is not valid
+      return res.sendStatus(404);
+    }
+
+    return models.Links.get({ url })
+      .then(link => {
+        if (link) {
+          throw link;
+        }
+        return models.Links.getUrlTitle(url);
+      })
+      .then(title => {
+        return models.Links.create({
+          url: url,
+          title: title,
+          baseUrl: req.headers.origin
+        });
+      })
+      .then(results => {
+        return models.Links.get({ id: results.insertId });
+      })
+      .then(link => {
+        throw link;
+      })
+      .error(error => {
+        res.status(500).send(error);
+      })
+      .catch(link => {
+        res.status(200).send(link);
+      });
+  });
 
 /************************************************************/
 // Write your authentication routes here
@@ -117,41 +117,36 @@ app.get('/login',
 
 app.post('/login',
   (req, res, next) => {
+    // Inputed values from  login form
+    var username = req.body.username;
+    var password = req.body.password;
 
-    // get user from login
-      // check if user exist
-    models.Users.get({username: req.body.username})
-    .then(user => {
-      if (!user) {
-        throw null;
-      }
-      return user;
-    })
-    .then((user) => {
-      var inputUser = models.Users.hashPassword({
-        username: req.body.username,
-        password: req.body.password
+    models.Users.get({ username })
+      .then(user => {
+        // First check if user exist in DB if not redirect user to the sign-up page
+        if (!user) {
+          throw null;
+        }
+        return user;
+      })
+      .then((user) => {
+        if (!models.Users.compare(password, user.password, user.salt)) {
+          // Redirect user to login page again to attempt login again
+          res.redirect('/login');
+        }
+
+        // return models.Sessions.update({ hash: req.session.hash }, { user_id: user.id });
+      })
+      .then(() => {
+        // On success if password and username match redirect user to home page
+        res.redirect('/');
+      })
+      .error(error => {
+        res.status(500).send(error);
+      })
+      .catch(() => {
+        res.redirect('/signup');
       });
-
-      if (user.password === inputUser.password) {
-        res.redirect(301, '/');
-      } else {
-        res.redirect(301 ,'/login')
-      }
-    })
-    .catch(() => {
-      res.redirect(301, '/signup');
-    });
-      // if user exist check if password is correct
-        // login user
-      // else if return to same page if password is incorrect
-      // else if user does not exist go to signup
-
-    // hash the password using same process as signup
-    // (req.body.password)
-    // retrieve users hashed password from database and compare
-    // if match, 
-
   });
 
 
