@@ -18,17 +18,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve static files from ../public directory
 app.use(express.static(path.join(__dirname, '../public')));
 
-app.get('/',
+app.use(require('./middleware/cookieParser'));
+app.use(Auth.createSession);
+
+app.get('/', Auth.verifySession,
   (req, res) => {
     res.render('index');
   });
 
-app.get('/create',
+app.get('/create', Auth.verifySession,
   (req, res) => {
     res.render('index');
   });
 
-app.get('/links',
+app.get('/links', Auth.verifySession,
   (req, res, next) => {
     models.Links.getAll()
       .then(links => {
@@ -39,7 +42,7 @@ app.get('/links',
       });
   });
 
-app.post('/links',
+app.post('/links', Auth.verifySession,
   (req, res, next) => {
     var url = req.body.url;
     if (!models.Links.isValidUrl(url)) {
@@ -84,30 +87,33 @@ app.get('/signup',
     res.render('signup');
   });
 
-app.post('/signup',
-  (req, res, next) => {
+app.post('/signup', (req, res, next) => {
+  var username = req.body.username;
+  var password = req.body.password;
 
-    models.Users.get({username: req.body.username})
+  return models.Users.get({ username })
     .then(user => {
       if (user) {
+        // user already exists; throw user to catch and redirect
         throw user;
       }
+
+      return models.Users.create({ username, password });
+    })
+    .then(results => {
+      return models.Sessions.update({ hash: req.session.hash }, { user_id: results.insertId });
     })
     .then(() => {
-      models.Users.create({
-        username: req.body.username,
-        password: req.body.password
-      });
+      res.redirect('/');
     })
-    .then(() =>{
-      res.redirect(301, '/');
+    .error(error => {
+      res.status(500).send(error);
     })
     .catch(user => {
-      // Why do we want to redirect user from signup back to signup if they already created an account
-      // Changed test so redirects to login if user is already created
-      res.redirect(301, '/login');
+      res.redirect('/login');
     });
-  });
+});
+
 
 
 app.get('/login',
@@ -135,7 +141,7 @@ app.post('/login',
           res.redirect('/login');
         }
 
-        // return models.Sessions.update({ hash: req.session.hash }, { user_id: user.id });
+        return models.Sessions.update({ hash: req.session.hash }, { user_id: user.id });
       })
       .then(() => {
         // On success if password and username match redirect user to home page
@@ -148,6 +154,19 @@ app.post('/login',
         res.redirect('/signup');
       });
   });
+
+
+app.get('/logout', (req, res, next) => {
+
+  return models.Sessions.delete({ hash: req.cookies.shortlyid })
+    .then(() => {
+      res.clearCookie('shortlyid');
+      res.redirect('/login');
+    })
+    .error(error => {
+      res.status(500).send(error);
+    });
+});
 
 
 /************************************************************/
